@@ -11,8 +11,14 @@ app.use(express.json());
 
 const PORT = 3001;
 
+// Ensure database folder exists
+const dbFolder = path.join(__dirname, 'database');
+if (!fs.existsSync(dbFolder)) {
+  fs.mkdirSync(dbFolder, { recursive: true });
+}
+
 // Initialize Database
-const db = new sqlite3.Database('./audit.db', (err) => {
+const db = new sqlite3.Database(path.join(dbFolder, 'audit.db'), (err) => {
   if (err) {
     console.error('Error opening database', err);
   } else {
@@ -111,6 +117,16 @@ app.post('/api/scan', (req, res) => {
       function(err) {
         if (err) {
           console.error("Failed to insert log:", err.message);
+        } else {
+          // Export to JSON for easy viewing in VS Code
+          db.all(`SELECT * FROM forensic_logs ORDER BY timestamp DESC`, [], (err, rows) => {
+            if (!err) {
+              fs.writeFileSync(
+                path.join(dbFolder, 'vs_code_data_viewer.json'), 
+                JSON.stringify(rows, null, 2)
+              );
+            }
+          });
         }
       }
     );
