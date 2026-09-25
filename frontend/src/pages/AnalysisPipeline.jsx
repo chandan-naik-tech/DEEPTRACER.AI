@@ -21,12 +21,12 @@ const PIPELINE_STAGES = [
   "RESULT"
 ];
 
-const mockChartData = [
-  { name: 'Normal', value: 8900 },
-  { name: 'Duplicates', value: 1294 },
-  { name: 'Damaged', value: 237 },
-  { name: 'Suspicious', value: 43 },
-  { name: 'Threats', value: 12 }
+const mockTableData = [
+  { file: 'evidence_photo.jpg', type: 'Image', status: 'Fully Reconstructed', integrity: '100%', threat: 'Safe (0/100)', priority: 'Medium', duplicate: 'NO' },
+  { file: 'invoice.pdf', type: 'PDF', status: 'Fully Reconstructed', integrity: '94%', threat: 'No strong indicator (3/100)', priority: 'High', duplicate: 'NO' },
+  { file: 'update.exe', type: 'Executable', status: 'Partially Reconstructed', integrity: '62%', threat: 'Potentially Malicious (87/100)', priority: 'Critical', duplicate: 'NO' },
+  { file: 'notes_copy.txt', type: 'Text', status: 'Duplicate', integrity: '100%', threat: 'Safe (0/100)', priority: 'Low', duplicate: 'YES' },
+  { file: 'damaged_archive.zip', type: 'Archive', status: 'Corrupted', integrity: '41%', threat: 'Suspicious (18/100)', priority: 'High', duplicate: 'NO' }
 ];
 
 export default function AnalysisPipeline() {
@@ -228,19 +228,49 @@ export default function AnalysisPipeline() {
 
         </div>
 
-        {/* Chart Area */}
+        {/* Table Area */}
         <div className="card" style={{ flex: 1, minHeight: '300px' }}>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Classification Summary</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Scan Results</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Source: {currentSession?.target || 'synthetic_demo.raw'} | Scan ID: {id}</p>
+            </div>
+            {isComplete && (
+              <button className="btn btn-secondary" style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}>
+                EXPORT JSON
+              </button>
+            )}
+          </div>
+          
           {isComplete ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={mockChartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip cursor={{ fill: 'var(--bg-primary)' }} />
-                <Bar dataKey="value" fill="var(--primary-color)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: 'var(--text-secondary)' }}>
+                    <th style={{ padding: '1rem 0.5rem' }}>File</th>
+                    <th style={{ padding: '1rem 0.5rem' }}>Type</th>
+                    <th style={{ padding: '1rem 0.5rem' }}>Status</th>
+                    <th style={{ padding: '1rem 0.5rem' }}>Integrity</th>
+                    <th style={{ padding: '1rem 0.5rem' }}>Threat</th>
+                    <th style={{ padding: '1rem 0.5rem' }}>Priority</th>
+                    <th style={{ padding: '1rem 0.5rem' }}>Duplicate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockTableData.map((row, index) => (
+                    <tr key={index} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: row.priority === 'Critical' ? 'rgba(239, 68, 68, 0.1)' : 'transparent' }}>
+                      <td style={{ padding: '1rem 0.5rem' }}>{row.file}</td>
+                      <td style={{ padding: '1rem 0.5rem' }}>{row.type}</td>
+                      <td style={{ padding: '1rem 0.5rem' }}>{row.status}</td>
+                      <td style={{ padding: '1rem 0.5rem' }}>{row.integrity}</td>
+                      <td style={{ padding: '1rem 0.5rem' }}>{row.threat}</td>
+                      <td style={{ padding: '1rem 0.5rem', color: row.priority === 'Critical' ? 'var(--danger)' : row.priority === 'High' ? 'var(--warning)' : row.priority === 'Medium' ? 'var(--info)' : 'var(--text-secondary)' }}>{row.priority}</td>
+                      <td style={{ padding: '1rem 0.5rem' }}>{row.duplicate}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
               Awaiting data from pipeline...
