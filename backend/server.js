@@ -100,6 +100,19 @@ function getFileHash(filePath) {
   return hashSum.digest('hex');
 }
 
+// Helper to normalize Windows duplicate filenames (e.g., "file - Copy.txt", "file (1).txt" -> "file.txt")
+function getNormalizedFilename(filePath) {
+  let name = path.basename(filePath).toLowerCase();
+  const ext = path.extname(name);
+  let base = path.basename(name, ext);
+  
+  // Strip " - copy", " - copy (1)", " (1)", etc.
+  base = base.replace(/\s-\s*copy(\s*\(\d+\))?$/, '');
+  base = base.replace(/\s*\(\d+\)$/, '');
+  
+  return base + ext;
+}
+
 // POST /api/scan
 app.post('/api/scan', (req, res) => {
   const { targetPath } = req.body;
@@ -138,11 +151,15 @@ app.post('/api/scan', (req, res) => {
       // Hash and Name for duplicates
       try {
         const hash = getFileHash(file);
-        if (hashMap[hash] || nameMap[lowerName]) {
+        const normalizedName = getNormalizedFilename(file);
+        const isZeroBytes = stats.size === 0;
+        
+        // If it's a 0-byte file, ONLY compare by normalized name (don't use hash, otherwise all empty test files get flagged)
+        if ((!isZeroBytes && hashMap[hash]) || nameMap[normalizedName]) {
           duplicates.push(file); // This is a duplicate by either hash or filename
         } else {
-          hashMap[hash] = file; // First occurrence
-          nameMap[lowerName] = file;
+          if (!isZeroBytes) hashMap[hash] = file;
+          nameMap[normalizedName] = file;
         }
       } catch (e) {
         console.error("Error reading file for hash:", file);
@@ -195,16 +212,18 @@ app.post('/api/remediate', (req, res) => {
 
       allFiles.forEach(file => {
         try {
+          const stats = fs.statSync(file);
           const hash = getFileHash(file);
-          const lowerName = path.basename(file).toLowerCase();
+          const normalizedName = getNormalizedFilename(file);
+          const isZeroBytes = stats.size === 0;
           
-          if (hashMap[hash] || nameMap[lowerName]) {
+          if ((!isZeroBytes && hashMap[hash]) || nameMap[normalizedName]) {
             // It's a duplicate by hash or name, delete it physically
             fs.unlinkSync(file);
             deletedCount++;
           } else {
-            hashMap[hash] = file;
-            nameMap[lowerName] = file;
+            if (!isZeroBytes) hashMap[hash] = file;
+            nameMap[normalizedName] = file;
           }
         } catch (e) {
           console.error("Failed to delete", file);
