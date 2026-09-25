@@ -23,6 +23,8 @@ const db = new sqlite3.Database(path.join(dbFolder, 'audit.db'), (err) => {
     console.error('Error opening database', err);
   } else {
     console.log('Connected to the SQLite database.');
+    
+    // Create forensic_logs table
     db.run(`CREATE TABLE IF NOT EXISTS forensic_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user TEXT,
@@ -32,8 +34,44 @@ const db = new sqlite3.Database(path.join(dbFolder, 'audit.db'), (err) => {
       damaged_found INTEGER,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
+
+    // Create users table
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE,
+      role TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`, () => {
+      // Seed default users if they don't exist
+      db.run(`INSERT OR IGNORE INTO users (username, role) VALUES ('admin', 'admin')`);
+      db.run(`INSERT OR IGNORE INTO users (username, role) VALUES ('demo_user', 'user')`);
+      
+      // Export initial DB state to JSON
+      exportDatabaseToJson();
+    });
   }
 });
+
+// Helper to export full DB to JSON
+function exportDatabaseToJson() {
+  db.all(`SELECT * FROM users`, [], (err, users) => {
+    if (!err) {
+      db.all(`SELECT * FROM forensic_logs ORDER BY timestamp DESC`, [], (err, logs) => {
+        if (!err) {
+          const exportData = {
+            ADMIN_ACCOUNTS: users.filter(u => u.role === 'admin'),
+            USER_ACCOUNTS: users.filter(u => u.role === 'user'),
+            FORENSIC_AUDIT_LOGS: logs
+          };
+          fs.writeFileSync(
+            path.join(dbFolder, 'vs_code_data_viewer.json'), 
+            JSON.stringify(exportData, null, 2)
+          );
+        }
+      });
+    }
+  });
+}
 
 // Helper to recursively get all files in a dir
 function getAllFiles(dirPath, arrayOfFiles) {
@@ -119,14 +157,7 @@ app.post('/api/scan', (req, res) => {
           console.error("Failed to insert log:", err.message);
         } else {
           // Export to JSON for easy viewing in VS Code
-          db.all(`SELECT * FROM forensic_logs ORDER BY timestamp DESC`, [], (err, rows) => {
-            if (!err) {
-              fs.writeFileSync(
-                path.join(dbFolder, 'vs_code_data_viewer.json'), 
-                JSON.stringify(rows, null, 2)
-              );
-            }
-          });
+          exportDatabaseToJson();
         }
       }
     );
