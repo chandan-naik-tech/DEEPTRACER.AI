@@ -1,25 +1,39 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const SessionContext = createContext();
 
 export function SessionProvider({ children }) {
-  // Pre-seed some mock sessions
-  const [sessions, setSessions] = useState([
-    {
-      id: 'demo-1234',
-      target: 'C:\\Users\\Demo\\Dataset',
-      status: 'Completed',
-      date: new Date().toLocaleDateString(),
-      owner: 'demo_user'
-    },
-    {
-      id: 'ext-4412',
-      target: '\\\\SERVER\\shared_logs',
-      status: 'Threats Found',
-      date: 'Sep 21, 2026',
-      owner: 'security_analyst'
+  // Try to load from localStorage first
+  const [sessions, setSessions] = useState(() => {
+    const saved = localStorage.getItem('deep_tracer_sessions');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) { console.error(e); }
     }
-  ]);
+    // Pre-seed some mock sessions if nothing saved
+    return [
+      {
+        id: 'demo-1234',
+        target: 'C:\\Users\\Demo\\Dataset',
+        status: 'Completed',
+        date: new Date().toLocaleDateString(),
+        owner: 'demo_user'
+      },
+      {
+        id: 'ext-4412',
+        target: '\\\\SERVER\\shared_logs',
+        status: 'Threats Found',
+        date: 'Sep 21, 2026',
+        owner: 'security_analyst'
+      }
+    ];
+  });
+
+  // Save to localStorage whenever sessions change
+  useEffect(() => {
+    localStorage.setItem('deep_tracer_sessions', JSON.stringify(sessions));
+  }, [sessions]);
 
   const addSession = (session) => {
     setSessions(prev => [session, ...prev]);
