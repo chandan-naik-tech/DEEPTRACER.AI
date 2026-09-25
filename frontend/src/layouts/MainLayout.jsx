@@ -10,6 +10,7 @@ export default function MainLayout() {
   const { user, logout } = useAuth();
   const { config } = useConfig();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const navItems = [
     { name: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
@@ -91,12 +92,33 @@ export default function MainLayout() {
             />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', position: 'relative' }}>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-              <Bell size={20} />
-            </button>
+            <div style={{ position: 'relative' }}>
+              <button 
+                onClick={() => { setShowNotifications(!showNotifications); setShowDropdown(false); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+              >
+                <Bell size={20} />
+                <div style={{ position: 'absolute', top: '0', right: '0', width: '8px', height: '8px', backgroundColor: 'var(--danger)', borderRadius: '50%' }} />
+              </button>
+              
+              {showNotifications && (
+                <div className="card" style={{ position: 'absolute', top: '100%', right: '-10px', marginTop: '1rem', padding: '1rem', width: '280px', zIndex: 10, display: 'flex', flexDirection: 'column', gap: '0.5rem', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+                  <h4 style={{ margin: 0, borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Notifications</h4>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', padding: '0.5rem 0' }}>
+                    <div style={{ color: 'var(--success)', fontWeight: 500, marginBottom: '0.25rem' }}>System Update</div>
+                    Deep Tracer AI engine has been updated with Deep Sector Recovery v1.2.
+                  </div>
+                  <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', padding: '0.5rem 0', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ color: 'var(--warning)', fontWeight: 500, marginBottom: '0.25rem' }}>Scan Alert</div>
+                    High volume of duplicates detected in recent sessions.
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div 
               style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}
-              onClick={() => setShowDropdown(!showDropdown)}
+              onClick={() => { setShowDropdown(!showDropdown); setShowNotifications(false); }}
             >
               <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: user?.role === 'admin' ? 'var(--primary-color)' : 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: user?.role === 'admin' ? 'white' : 'var(--primary-color)' }}>
                 {user?.role === 'admin' ? <ShieldAlert size={16} /> : <User size={16} />}
