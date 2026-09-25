@@ -207,7 +207,7 @@ export default function AnalysisPipeline() {
 
           <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Deleted Fragments</h3>
+              <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Deleted Files</h3>
               <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--info)' }}>
                 {isComplete ? 3 : currentStage > 2 ? Math.floor(Math.random() * 20) : '...'}
               </div>
