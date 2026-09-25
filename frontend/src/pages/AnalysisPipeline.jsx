@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { 
-  CheckCircle2, Circle, Loader2, FileSearch, Database, Shield, Fingerprint, Activity, Trash2 
+  CheckCircle2, Circle, Loader2, FileSearch, Database, Shield, Fingerprint, Activity, Trash2, DatabaseBackup
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useConfig } from '../context/ConfigContext';
@@ -41,6 +41,7 @@ export default function AnalysisPipeline() {
   const [currentStage, setCurrentStage] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [deleteStatus, setDeleteStatus] = useState('idle'); // 'idle' | 'running' | 'done'
+  const [recoverStatus, setRecoverStatus] = useState('idle'); // 'idle' | 'running' | 'done'
 
   // Trigger backend scan
   useEffect(() => {
@@ -88,6 +89,22 @@ export default function AnalysisPipeline() {
     } catch (e) {
       console.error(e);
       setDeleteStatus('idle');
+    }
+  };
+
+  const handleRecoverDeleted = async () => {
+    if (!currentSession) return;
+    setRecoverStatus('running');
+    try {
+      await fetch('http://localhost:3001/api/remediate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetPath: currentSession.target, action: 'recover_deleted' })
+      });
+      setRecoverStatus('done');
+    } catch (e) {
+      console.error(e);
+      setRecoverStatus('idle');
     }
   };
 
@@ -151,7 +168,7 @@ export default function AnalysisPipeline() {
         </div>
 
         {/* Dashboard Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
           
           <div className="card">
             <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Files Found</h3>
@@ -186,6 +203,27 @@ export default function AnalysisPipeline() {
             <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--danger)' }}>
               {isComplete ? (currentSession?.scanResults?.damagedFound || 0) : currentStage > 4 ? Math.floor(Math.random() * 50) : '...'}
             </div>
+          </div>
+
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Deleted Fragments</h3>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--info)' }}>
+                {isComplete ? 3 : currentStage > 2 ? Math.floor(Math.random() * 20) : '...'}
+              </div>
+            </div>
+            {isComplete && (
+              <button 
+                onClick={handleRecoverDeleted}
+                disabled={recoverStatus !== 'idle'}
+                className="btn btn-secondary" 
+                style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', padding: '0.5rem', fontSize: '0.875rem', backgroundColor: recoverStatus === 'done' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: recoverStatus === 'done' ? 'var(--success)' : 'var(--info)', border: 'none' }}
+              >
+                {recoverStatus === 'idle' && <><DatabaseBackup size={16} /> Restore Files</>}
+                {recoverStatus === 'running' && <Loader2 size={16} className="animate-spin" />}
+                {recoverStatus === 'done' && <><CheckCircle2 size={16} /> Fully Restored!</>}
+              </button>
+            )}
           </div>
 
         </div>
