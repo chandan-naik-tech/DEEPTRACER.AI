@@ -60,6 +60,7 @@ export default function DatabaseViewerPage() {
                 <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>TIMESTAMP</th>
                 <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>USER</th>
                 <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>TARGET_PATH</th>
+                <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>STATUS</th>
                 <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>FILES</th>
                 <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>DUPLICATES</th>
                 <th style={{ padding: '1rem', fontWeight: 600, color: 'var(--text-secondary)', fontSize: '0.875rem' }}>DAMAGED</th>
@@ -86,6 +87,7 @@ export default function DatabaseViewerPage() {
                     <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{new Date(log.timestamp).toLocaleString()}</td>
                     <td style={{ padding: '1rem', fontWeight: 500 }}>{log.user}</td>
                     <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{log.target_path}</td>
+                    <td style={{ padding: '1rem', fontSize: '0.875rem', color: log.status.includes('Failed') ? 'var(--danger)' : '#10b981' }}>{log.status}</td>
                     <td style={{ padding: '1rem', color: 'var(--primary-color)', fontWeight: 600 }}>{log.files_analyzed}</td>
                     <td style={{ padding: '1rem', color: '#f59e0b', fontWeight: 600 }}>{log.duplicates_found}</td>
                     <td style={{ padding: '1rem', color: 'var(--danger)', fontWeight: 600 }}>{log.damaged_found}</td>

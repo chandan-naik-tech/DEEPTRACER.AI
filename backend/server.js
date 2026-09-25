@@ -29,6 +29,7 @@ const db = new sqlite3.Database(path.join(dbFolder, 'audit.db'), (err) => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user TEXT,
       target_path TEXT,
+      status TEXT,
       files_analyzed INTEGER,
       duplicates_found INTEGER,
       damaged_found INTEGER,
@@ -102,8 +103,16 @@ function getFileHash(filePath) {
 // POST /api/scan
 app.post('/api/scan', (req, res) => {
   const { targetPath } = req.body;
+  const runUser = req.body.user || 'Unknown User';
 
   if (!fs.existsSync(targetPath)) {
+    // Log the failed attempt to the database!
+    db.run(`INSERT INTO forensic_logs (user, target_path, status, files_analyzed, duplicates_found, damaged_found) VALUES (?, ?, ?, ?, ?, ?)`, 
+      [runUser, targetPath, "Failed (Path Not Found)", 0, 0, 0], 
+      function(err) {
+        if (!err) exportDatabaseToJson();
+      }
+    );
     return res.status(400).json({ error: 'Target path does not exist on the filesystem.' });
   }
 
@@ -147,11 +156,8 @@ app.post('/api/scan', (req, res) => {
     };
 
     // Log this scan in our real SQLite Database!
-    // We assume an optional 'user' field comes from frontend context
-    const runUser = req.body.user || 'Unknown User';
-    
-    db.run(`INSERT INTO forensic_logs (user, target_path, files_analyzed, duplicates_found, damaged_found) VALUES (?, ?, ?, ?, ?)`, 
-      [runUser, targetPath, responsePayload.filesAnalyzed, responsePayload.duplicatesFound, responsePayload.damagedFound], 
+    db.run(`INSERT INTO forensic_logs (user, target_path, status, files_analyzed, duplicates_found, damaged_found) VALUES (?, ?, ?, ?, ?, ?)`, 
+      [runUser, targetPath, "Success", responsePayload.filesAnalyzed, responsePayload.duplicatesFound, responsePayload.damagedFound], 
       function(err) {
         if (err) {
           console.error("Failed to insert log:", err.message);
