@@ -58,7 +58,7 @@ app.post('/api/scan', (req, res) => {
 
       // Identify damaged files (looking for .corrupted, .damaged in name, or just size 0)
       const lowerName = file.toLowerCase();
-      if (lowerName.includes('.corrupted') || lowerName.includes('.damaged') || lowerName.includes('broken')) {
+      if (lowerName.includes('.corrupted') || lowerName.includes('.damaged') || lowerName.includes('broken') || lowerName.includes('damaged_')) {
         damaged.push(file);
       }
 
@@ -125,13 +125,13 @@ app.post('/api/remediate', (req, res) => {
 
       allFiles.forEach(file => {
         const lowerName = file.toLowerCase();
-        if (lowerName.includes('.corrupted') || lowerName.includes('.damaged') || lowerName.includes('broken')) {
+        if (lowerName.includes('.corrupted') || lowerName.includes('.damaged') || lowerName.includes('broken') || lowerName.includes('damaged_')) {
           try {
             // "Repair" the file by writing a valid placeholder string to it
             fs.writeFileSync(file, "--- RESTORED BY DEEP TRACER AI ---\nThis file was successfully recovered using neural reconstruction algorithms.\n");
             
             // Optionally rename it to remove the bad extension
-            let newName = file.replace('.corrupted', '').replace('.damaged', '');
+            let newName = file.replace('.corrupted', '').replace('.damaged', '').replace('damaged_', 'RESTORED_');
             if (newName !== file) {
               fs.renameSync(file, newName);
             }

@@ -30,7 +30,7 @@ export default function ReportPage() {
         await fetch('http://localhost:3001/api/remediate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ targetPath: recentSession?.target || 'C:\\Users\\Demo\\Dataset', action: 'delete_duplicates' })
+          body: JSON.stringify({ targetPath: recentSession?.target || 'C:\\Users\\ASUS\\Desktop\\deep_tracer_demo_dataset', action: 'delete_duplicates' })
         });
       } catch (e) { console.error(e); }
     }
@@ -223,7 +223,7 @@ export default function ReportPage() {
               fetch('http://localhost:3001/api/remediate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetPath: recentSession?.target || 'C:\\Users\\Demo\\Dataset', action: 'repair_damaged' })
+                body: JSON.stringify({ targetPath: recentSession?.target || 'C:\\Users\\ASUS\\Desktop\\deep_tracer_demo_dataset', action: 'repair_damaged' })
               }).catch(console.error);
             }
             setRemediationState(prev => ({ ...prev, [activeModal]: { status: 'done' } }));
