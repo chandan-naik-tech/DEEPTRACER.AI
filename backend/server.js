@@ -121,6 +121,7 @@ app.post('/api/scan', (req, res) => {
     
     let totalSize = 0;
     const hashMap = {};
+    const nameMap = {};
     let duplicates = [];
     let damaged = [];
 
@@ -129,18 +130,19 @@ app.post('/api/scan', (req, res) => {
       totalSize += stats.size;
 
       // Identify damaged files (looking for .corrupted, .damaged in name, or just size 0)
-      const lowerName = file.toLowerCase();
+      const lowerName = path.basename(file).toLowerCase();
       if (lowerName.includes('.corrupted') || lowerName.includes('.damaged') || lowerName.includes('broken') || lowerName.includes('damaged_')) {
         damaged.push(file);
       }
 
-      // Hash for duplicates
+      // Hash and Name for duplicates
       try {
         const hash = getFileHash(file);
-        if (hashMap[hash]) {
-          duplicates.push(file); // This is a duplicate
+        if (hashMap[hash] || nameMap[lowerName]) {
+          duplicates.push(file); // This is a duplicate by either hash or filename
         } else {
           hashMap[hash] = file; // First occurrence
+          nameMap[lowerName] = file;
         }
       } catch (e) {
         console.error("Error reading file for hash:", file);
@@ -188,17 +190,21 @@ app.post('/api/remediate', (req, res) => {
     
     if (action === 'delete_duplicates') {
       const hashMap = {};
+      const nameMap = {};
       let deletedCount = 0;
 
       allFiles.forEach(file => {
         try {
           const hash = getFileHash(file);
-          if (hashMap[hash]) {
-            // It's a duplicate, delete it physically
+          const lowerName = path.basename(file).toLowerCase();
+          
+          if (hashMap[hash] || nameMap[lowerName]) {
+            // It's a duplicate by hash or name, delete it physically
             fs.unlinkSync(file);
             deletedCount++;
           } else {
             hashMap[hash] = file;
+            nameMap[lowerName] = file;
           }
         } catch (e) {
           console.error("Failed to delete", file);

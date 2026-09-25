@@ -15,5 +15,86 @@
       "created_at": "2026-09-25 12:28:50"
     }
   ],
-  "FORENSIC_AUDIT_LOGS": []
+  "FORENSIC_AUDIT_LOGS": [
+    {
+      "id": 7,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 3,
+      "duplicates_found": 2,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 12:42:34"
+    },
+    {
+      "id": 8,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 3,
+      "duplicates_found": 2,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 12:42:34"
+    },
+    {
+      "id": 5,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 3,
+      "duplicates_found": 2,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 12:40:49"
+    },
+    {
+      "id": 6,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 3,
+      "duplicates_found": 2,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 12:40:49"
+    },
+    {
+      "id": 3,
+      "user": "vinay",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deep_tracer_demo_dataset",
+      "status": "Success",
+      "files_analyzed": 15,
+      "duplicates_found": 0,
+      "damaged_found": 1,
+      "timestamp": "2026-09-25 12:36:35"
+    },
+    {
+      "id": 4,
+      "user": "vinay",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deep_tracer_demo_dataset",
+      "status": "Success",
+      "files_analyzed": 15,
+      "duplicates_found": 0,
+      "damaged_found": 1,
+      "timestamp": "2026-09-25 12:36:35"
+    },
+    {
+      "id": 1,
+      "user": "vinay",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deep_tracer_demo_dataset",
+      "status": "Success",
+      "files_analyzed": 15,
+      "duplicates_found": 0,
+      "damaged_found": 1,
+      "timestamp": "2026-09-25 12:33:36"
+    },
+    {
+      "id": 2,
+      "user": "vinay",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deep_tracer_demo_dataset",
+      "status": "Success",
+      "files_analyzed": 15,
+      "duplicates_found": 0,
+      "damaged_found": 1,
+      "timestamp": "2026-09-25 12:33:36"
+    }
+  ]
 }
