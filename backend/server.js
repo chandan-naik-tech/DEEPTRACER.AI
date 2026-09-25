@@ -40,12 +40,13 @@ const db = new sqlite3.Database(path.join(dbFolder, 'audit.db'), (err) => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE,
+      password TEXT,
       role TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`, () => {
       // Seed default users if they don't exist
-      db.run(`INSERT OR IGNORE INTO users (username, role) VALUES ('admin', 'admin')`);
-      db.run(`INSERT OR IGNORE INTO users (username, role) VALUES ('demo_user', 'user')`);
+      db.run(`INSERT OR IGNORE INTO users (username, password, role) VALUES ('admin', 'admin@123', 'admin')`);
+      db.run(`INSERT OR IGNORE INTO users (username, password, role) VALUES ('demo_user', 'user@123', 'user')`);
       
       // Export initial DB state to JSON
       exportDatabaseToJson();
@@ -112,6 +113,48 @@ function getNormalizedFilename(filePath) {
   
   return base + ext;
 }
+
+// POST /api/register
+app.post('/api/register', (req, res) => {
+  const { username, password, role = 'user' } = req.body;
+  
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
+  }
+
+  db.run(`INSERT INTO users (username, password, role) VALUES (?, ?, ?)`, [username, password, role], function(err) {
+    if (err) {
+      if (err.message.includes('UNIQUE constraint failed')) {
+        return res.status(409).json({ error: 'Username already exists' });
+      }
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    exportDatabaseToJson();
+    res.json({ success: true, message: 'User registered successfully', user: { id: this.lastID, username, role } });
+  });
+});
+
+// POST /api/login
+app.post('/api/login', (req, res) => {
+  const { username, password, role } = req.body;
+  
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
+  }
+
+  db.get(`SELECT * FROM users WHERE username = ? AND password = ? AND role = ?`, [username, password, role], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials. User not found or incorrect password.' });
+    }
+    
+    res.json({ success: true, user: { id: user.id, username: user.username, role: user.role } });
+  });
+});
 
 // POST /api/scan
 app.post('/api/scan', (req, res) => {

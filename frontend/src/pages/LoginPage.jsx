@@ -9,22 +9,39 @@ export default function LoginPage({ type }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isAdmin = type === 'admin';
 
-  const handleLogin = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
-    if (isAdmin) {
-      if (username !== 'admin' || password !== 'admin@123') {
-        setError('Invalid admin credentials.');
+    try {
+      const endpoint = isRegistering ? 'http://localhost:3001/api/register' : 'http://localhost:3001/api/login';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role: type })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setError(data.error || 'Authentication failed');
+        setIsLoading(false);
         return;
       }
-    }
 
-    login(type, username);
-    navigate('/app/dashboard');
+      login(data.user.role, data.user.username);
+      navigate('/app/dashboard');
+    } catch (err) {
+      setError('Could not connect to the server.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,10 +63,10 @@ export default function LoginPage({ type }) {
             {isAdmin ? <ShieldAlert size={32} /> : <User size={32} />}
           </div>
           <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
-            {isAdmin ? 'Admin Portal' : 'Welcome Back'}
+            {isAdmin ? 'Admin Portal' : (isRegistering ? 'Create Account' : 'Welcome Back')}
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            Sign in to DEEP TRACER AI
+            {isRegistering ? 'Join DEEP TRACER AI today' : 'Sign in to DEEP TRACER AI'}
           </p>
         </div>
 
@@ -59,7 +76,7 @@ export default function LoginPage({ type }) {
           </div>
         )}
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>
               Username / Email
@@ -80,7 +97,7 @@ export default function LoginPage({ type }) {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
               <label style={{ fontSize: '0.875rem', fontWeight: 500 }}>Password</label>
-              <a href="#" style={{ fontSize: '0.75rem' }}>Forgot password?</a>
+              {!isRegistering && <a href="#" style={{ fontSize: '0.75rem' }}>Forgot password?</a>}
             </div>
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
@@ -95,14 +112,18 @@ export default function LoginPage({ type }) {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem', fontSize: '1rem' }}>
-            Login <ArrowRight size={18} style={{ marginLeft: '0.5rem' }} />
+          <button type="submit" disabled={isLoading} className="btn btn-primary" style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            {isLoading ? 'Processing...' : (isRegistering ? 'Register' : 'Login')} {!isLoading && <ArrowRight size={18} style={{ marginLeft: '0.5rem' }} />}
           </button>
         </form>
 
         {!isAdmin && (
           <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-            Don't have an account? <a href="#" style={{ fontWeight: 500 }}>Create Account</a>
+            {isRegistering ? (
+              <>Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); setIsRegistering(false); setError(''); }} style={{ fontWeight: 500, cursor: 'pointer' }}>Sign In</a></>
+            ) : (
+              <>Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); setIsRegistering(true); setError(''); }} style={{ fontWeight: 500, cursor: 'pointer' }}>Create Account</a></>
+            )}
           </div>
         )}
       </div>
