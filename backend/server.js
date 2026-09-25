@@ -218,8 +218,17 @@ app.post('/api/remediate', (req, res) => {
           const isZeroBytes = stats.size === 0;
           
           if ((!isZeroBytes && hashMap[hash]) || nameMap[normalizedName]) {
-            // It's a duplicate by hash or name, delete it physically
-            fs.unlinkSync(file);
+            // Instead of permanent deletion, move to a hidden backup directory so we can restore them later
+            const backupDir = path.join(targetPath, '.deeptraker_backup');
+            if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir);
+            
+            const safeName = Date.now() + '_' + path.basename(file);
+            const backupPath = path.join(backupDir, safeName);
+            
+            fs.renameSync(file, backupPath);
+            // Save original path for restoration
+            fs.writeFileSync(backupPath + '.meta', file);
+            
             deletedCount++;
           } else {
             if (!isZeroBytes) hashMap[hash] = file;
@@ -257,23 +266,31 @@ app.post('/api/remediate', (req, res) => {
       return res.json({ success: true, message: `Successfully repaired ${repairedCount} damaged files.` });
     
     } else if (action === 'recover_deleted') {
-      // For the hackathon demo, we simulate deep sector recovery by "restoring" hidden/deleted files
-      // We will create a few "recovered" files in the target directory to prove the concept to the judges.
-      
-      const recoveredFiles = [
-        "RECOVERED_document_fragment.docx",
-        "RECOVERED_deleted_image.jpg",
-        "RECOVERED_sys_log.txt"
-      ];
+      // Deep Tracer AI actual restoration logic: move files back from the hidden .deeptraker_backup folder
+      const backupDir = path.join(targetPath, '.deeptraker_backup');
+      let restoredCount = 0;
 
-      recoveredFiles.forEach(fileName => {
-        const fullPath = path.join(targetPath, fileName);
-        if (!fs.existsSync(fullPath)) {
-          fs.writeFileSync(fullPath, "--- RECOVERED BY DEEP TRACER AI ---\nThis file was successfully salvaged from unallocated disk space using forensic deep-trace algorithms.\n");
-        }
-      });
+      if (fs.existsSync(backupDir)) {
+        const backedUpFiles = fs.readdirSync(backupDir);
+        
+        backedUpFiles.forEach(f => {
+          if (f.endsWith('.meta')) {
+            const metaPath = path.join(backupDir, f);
+            const originalPath = fs.readFileSync(metaPath, 'utf8');
+            const actualFile = metaPath.replace('.meta', '');
+            
+            if (fs.existsSync(actualFile)) {
+              // Restore the file to its exact original location!
+              fs.renameSync(actualFile, originalPath);
+              restoredCount++;
+            }
+            // Clean up the meta file
+            fs.unlinkSync(metaPath);
+          }
+        });
+      }
 
-      return res.json({ success: true, message: `Successfully recovered 3 deleted files from unallocated sectors.` });
+      return res.json({ success: true, message: `Successfully recovered ${restoredCount} deleted files to their exact original locations.` });
 
     } else {
       return res.status(400).json({ error: 'Unknown action.' });
