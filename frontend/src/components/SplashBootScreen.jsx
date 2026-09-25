@@ -68,7 +68,7 @@ export default function SplashBootScreen({ onComplete }) {
         textAlign: 'left'
       }}>
         {logs.map((log, index) => (
-          <div key={index} className="animate-fade-in" style={{ color: index === logs.length -1 && log.includes('ONLINE') ? '#10b981' : 'var(--primary-color)' }}>
+          <div key={index} className="animate-fade-in" style={{ color: index === logs.length -1 && log?.includes('ONLINE') ? '#10b981' : 'var(--primary-color)' }}>
             &gt; {log}
           </div>
         ))}
