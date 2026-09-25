@@ -48,7 +48,7 @@ export default function AnalysisPipeline() {
     fetch('http://localhost:3001/api/scan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targetPath: currentSession.target })
+      body: JSON.stringify({ targetPath: currentSession.target, user: currentSession.owner })
     })
     .then(res => res.json())
     .then(data => {

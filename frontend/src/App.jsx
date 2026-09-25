@@ -8,6 +8,7 @@ import AnalysisPipeline from './pages/AnalysisPipeline';
 import ReportPage from './pages/ReportPage';
 import SettingsPage from './pages/SettingsPage';
 import NewAnalysisPage from './pages/NewAnalysisPage';
+import DatabaseViewerPage from './pages/DatabaseViewerPage';
 import { AuthProvider } from './context/AuthContext';
 import { ConfigProvider } from './context/ConfigContext';
 import { SessionProvider } from './context/SessionContext';
@@ -35,6 +36,7 @@ function App() {
               <Route path="analysis/:id" element={<AnalysisPipeline />} />
               <Route path="reports" element={<ReportPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="database" element={<DatabaseViewerPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

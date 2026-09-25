@@ -3,12 +3,31 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const PORT = 3001;
+
+// Initialize Database
+const db = new sqlite3.Database('./audit.db', (err) => {
+  if (err) {
+    console.error('Error opening database', err);
+  } else {
+    console.log('Connected to the SQLite database.');
+    db.run(`CREATE TABLE IF NOT EXISTS forensic_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user TEXT,
+      target_path TEXT,
+      files_analyzed INTEGER,
+      duplicates_found INTEGER,
+      damaged_found INTEGER,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+  }
+});
 
 // Helper to recursively get all files in a dir
 function getAllFiles(dirPath, arrayOfFiles) {
@@ -75,13 +94,28 @@ app.post('/api/scan', (req, res) => {
       }
     });
 
-    res.json({
+    const responsePayload = {
       success: true,
       filesAnalyzed: allFiles.length,
       duplicatesFound: duplicates.length,
       damagedFound: damaged.length,
       totalSizeMB: (totalSize / (1024 * 1024)).toFixed(2)
-    });
+    };
+
+    // Log this scan in our real SQLite Database!
+    // We assume an optional 'user' field comes from frontend context
+    const runUser = req.body.user || 'Unknown User';
+    
+    db.run(`INSERT INTO forensic_logs (user, target_path, files_analyzed, duplicates_found, damaged_found) VALUES (?, ?, ?, ?, ?)`, 
+      [runUser, targetPath, responsePayload.filesAnalyzed, responsePayload.duplicatesFound, responsePayload.damagedFound], 
+      function(err) {
+        if (err) {
+          console.error("Failed to insert log:", err.message);
+        }
+      }
+    );
+
+    res.json(responsePayload);
 
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -150,6 +184,16 @@ app.post('/api/remediate', (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// GET /api/admin/logs
+app.get('/api/admin/logs', (req, res) => {
+  db.all(`SELECT * FROM forensic_logs ORDER BY timestamp DESC`, [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ success: true, logs: rows });
+  });
 });
 
 app.listen(PORT, () => {

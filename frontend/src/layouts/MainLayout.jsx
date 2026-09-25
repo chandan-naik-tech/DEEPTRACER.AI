@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileSearch, ShieldAlert, FileWarning, Search, Bell, User, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileSearch, ShieldAlert, FileWarning, Search, Bell, User, Settings, LogOut, Database } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useConfig } from '../context/ConfigContext';
 
@@ -19,6 +19,7 @@ export default function MainLayout() {
   ];
 
   if (user?.role === 'admin') {
+    navItems.push({ name: 'SQL Database', path: '/app/database', icon: Database });
     navItems.push({ name: 'Settings (CMS)', path: '/app/settings', icon: Settings });
   }
 
