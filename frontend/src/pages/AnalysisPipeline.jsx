@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { 
-  CheckCircle2, Circle, Loader2, FileSearch, Database, Shield, Fingerprint, Activity 
+  CheckCircle2, Circle, Loader2, FileSearch, Database, Shield, Fingerprint, Activity, Trash2 
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useConfig } from '../context/ConfigContext';
@@ -40,6 +40,7 @@ export default function AnalysisPipeline() {
 
   const [currentStage, setCurrentStage] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState('idle'); // 'idle' | 'running' | 'done'
 
   // Trigger backend scan
   useEffect(() => {
@@ -71,6 +72,24 @@ export default function AnalysisPipeline() {
       updateSessionStatus(id, 'Completed');
     }
   }, [currentStage]);
+
+  const handleDeleteDuplicates = async () => {
+    if (!currentSession) return;
+    setDeleteStatus('running');
+    try {
+      await fetch('http://localhost:3001/api/remediate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetPath: currentSession.target, action: 'delete_duplicates' })
+      });
+      // Optionally update the local session state to reflect 0 duplicates remaining
+      updateSession(id, { scanResults: { ...currentSession.scanResults, duplicatesFound: 0 } });
+      setDeleteStatus('done');
+    } catch (e) {
+      console.error(e);
+      setDeleteStatus('idle');
+    }
+  };
 
   const healthScore = isComplete ? 78 : Math.floor(Math.random() * 20 + 20);
 
@@ -141,11 +160,25 @@ export default function AnalysisPipeline() {
             </div>
           </div>
           
-          <div className="card">
-            <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Duplicates</h3>
-            <div style={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b' }}>
-              {isComplete ? (currentSession?.scanResults?.duplicatesFound || 0) : currentStage > 6 ? Math.floor(Math.random() * 100) : '...'}
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Duplicates</h3>
+              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b' }}>
+                {isComplete ? (currentSession?.scanResults?.duplicatesFound || 0) : currentStage > 6 ? Math.floor(Math.random() * 100) : '...'}
+              </div>
             </div>
+            {isComplete && (currentSession?.scanResults?.duplicatesFound > 0 || deleteStatus === 'done') && (
+              <button 
+                onClick={handleDeleteDuplicates}
+                disabled={deleteStatus !== 'idle'}
+                className="btn btn-secondary" 
+                style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', padding: '0.5rem', fontSize: '0.875rem', backgroundColor: deleteStatus === 'done' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: deleteStatus === 'done' ? 'var(--success)' : '#f59e0b', border: 'none' }}
+              >
+                {deleteStatus === 'idle' && <><Trash2 size={16} /> Delete All</>}
+                {deleteStatus === 'running' && <Loader2 size={16} className="animate-spin" />}
+                {deleteStatus === 'done' && <><CheckCircle2 size={16} /> Deleted!</>}
+              </button>
+            )}
           </div>
 
           <div className="card">
