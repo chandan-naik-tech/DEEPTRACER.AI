@@ -174,9 +174,9 @@ export default function AnalysisPipeline() {
                 className="btn btn-secondary" 
                 style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', padding: '0.5rem', fontSize: '0.875rem', backgroundColor: deleteStatus === 'done' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: deleteStatus === 'done' ? 'var(--success)' : '#f59e0b', border: 'none' }}
               >
-                {deleteStatus === 'idle' && <><Trash2 size={16} /> Delete All</>}
+                {deleteStatus === 'idle' && <><Trash2 size={16} /> Delete Duplicates</>}
                 {deleteStatus === 'running' && <Loader2 size={16} className="animate-spin" />}
-                {deleteStatus === 'done' && <><CheckCircle2 size={16} /> Deleted!</>}
+                {deleteStatus === 'done' && <><CheckCircle2 size={16} /> Duplicates Deleted!</>}
               </button>
             )}
           </div>

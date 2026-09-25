@@ -17,6 +17,26 @@
   ],
   "FORENSIC_AUDIT_LOGS": [
     {
+      "id": 13,
+      "user": "vinay",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 3,
+      "duplicates_found": 2,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 12:59:51"
+    },
+    {
+      "id": 14,
+      "user": "vinay",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 3,
+      "duplicates_found": 2,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 12:59:51"
+    },
+    {
       "id": 11,
       "user": "vinay",
       "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
