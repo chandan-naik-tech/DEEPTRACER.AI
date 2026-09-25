@@ -3,19 +3,48 @@
     {
       "id": 1,
       "username": "admin",
+      "password": "admin@123",
       "role": "admin",
-      "created_at": "2026-09-25 12:28:50"
+      "created_at": "2026-09-25 14:04:11"
     }
   ],
   "USER_ACCOUNTS": [
     {
       "id": 2,
       "username": "demo_user",
+      "password": "user@123",
       "role": "user",
-      "created_at": "2026-09-25 12:28:50"
+      "created_at": "2026-09-25 14:04:11"
+    },
+    {
+      "id": 5,
+      "username": "chandan",
+      "password": "chandan@123",
+      "role": "user",
+      "created_at": "2026-09-25 14:10:17"
     }
   ],
   "FORENSIC_AUDIT_LOGS": [
+    {
+      "id": 31,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 7,
+      "duplicates_found": 3,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 14:10:27"
+    },
+    {
+      "id": 32,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 7,
+      "duplicates_found": 3,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 14:10:27"
+    },
     {
       "id": 29,
       "user": "chandan",
