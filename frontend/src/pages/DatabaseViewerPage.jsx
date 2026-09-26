@@ -8,7 +8,7 @@ export default function DatabaseViewerPage() {
 
   const fetchLogs = () => {
     setLoading(true);
-    fetch('http://localhost:3001/api/admin/logs')
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/logs`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {

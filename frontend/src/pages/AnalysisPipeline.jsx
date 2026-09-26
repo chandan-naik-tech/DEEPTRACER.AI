@@ -49,7 +49,7 @@ export default function AnalysisPipeline() {
   useEffect(() => {
     if (!currentSession) return;
     
-    fetch('http://localhost:3001/api/scan', {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/scan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ targetPath: currentSession.target, user: currentSession.owner })
@@ -80,7 +80,7 @@ export default function AnalysisPipeline() {
     if (!currentSession) return;
     setDeleteStatus('running');
     try {
-      await fetch('http://localhost:3001/api/remediate', {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/remediate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetPath: currentSession.target, action: 'delete_duplicates' })
@@ -98,7 +98,7 @@ export default function AnalysisPipeline() {
     if (!currentSession) return;
     setRecoverStatus('running');
     try {
-      await fetch('http://localhost:3001/api/remediate', {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/remediate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetPath: currentSession.target, action: 'recover_deleted' })

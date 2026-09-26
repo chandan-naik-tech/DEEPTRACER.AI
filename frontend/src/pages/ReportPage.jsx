@@ -27,7 +27,7 @@ export default function ReportPage() {
     
     if (type === 'duplicate') {
       try {
-        await fetch('http://localhost:3001/api/remediate', {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/remediate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ targetPath: recentSession?.target || 'C:\\Users\\ASUS\\Desktop\\deep_tracer_demo_dataset', action: 'delete_duplicates' })
@@ -220,7 +220,7 @@ export default function ReportPage() {
           actionType={activeModal === 'recover' ? 'Deleted File Recovery' : 'Corrupted File Repair'}
           onClose={() => {
             if (activeModal === 'repair') {
-              fetch('http://localhost:3001/api/remediate', {
+              fetch(`${import.meta.env.VITE_API_BASE_URL}/api/remediate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ targetPath: recentSession?.target || 'C:\\Users\\ASUS\\Desktop\\deep_tracer_demo_dataset', action: 'repair_damaged' })

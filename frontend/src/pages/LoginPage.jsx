@@ -20,7 +20,7 @@ export default function LoginPage({ type }) {
     setIsLoading(true);
 
     try {
-      const endpoint = isRegistering ? 'http://localhost:3001/api/register' : 'http://localhost:3001/api/login';
+      const endpoint = isRegistering ? `${import.meta.env.VITE_API_BASE_URL}/api/register` : `${import.meta.env.VITE_API_BASE_URL}/api/login`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
