@@ -26,6 +26,66 @@
   ],
   "FORENSIC_AUDIT_LOGS": [
     {
+      "id": 39,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 28,
+      "duplicates_found": 14,
+      "damaged_found": 0,
+      "timestamp": "2026-09-26 02:17:19"
+    },
+    {
+      "id": 40,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 28,
+      "duplicates_found": 14,
+      "damaged_found": 0,
+      "timestamp": "2026-09-26 02:17:19"
+    },
+    {
+      "id": 37,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1\\deeptrace_test_cases",
+      "status": "Success",
+      "files_analyzed": 21,
+      "duplicates_found": 11,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 19:32:03"
+    },
+    {
+      "id": 38,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1\\deeptrace_test_cases",
+      "status": "Success",
+      "files_analyzed": 21,
+      "duplicates_found": 11,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 19:32:03"
+    },
+    {
+      "id": 35,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 7,
+      "duplicates_found": 3,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 19:28:02"
+    },
+    {
+      "id": 36,
+      "user": "chandan",
+      "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",
+      "status": "Success",
+      "files_analyzed": 7,
+      "duplicates_found": 3,
+      "damaged_found": 0,
+      "timestamp": "2026-09-25 19:28:02"
+    },
+    {
       "id": 33,
       "user": "chandan",
       "target_path": "C:\\Users\\ASUS\\Desktop\\deeptracker1",

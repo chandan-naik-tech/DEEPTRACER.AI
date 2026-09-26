@@ -38,6 +38,8 @@ export default function AnalysisPipeline() {
   
   const currentSession = sessions.find(s => s.id === id);
 
+  const tableDataToRender = currentSession?.scanResults?.filesList || mockTableData;
+
   const [currentStage, setCurrentStage] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [deleteStatus, setDeleteStatus] = useState('idle'); // 'idle' | 'running' | 'done'
@@ -257,7 +259,7 @@ export default function AnalysisPipeline() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockTableData.map((row, index) => (
+                  {tableDataToRender.map((row, index) => (
                     <tr key={index} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', backgroundColor: row.priority === 'Critical' ? 'rgba(239, 68, 68, 0.1)' : 'transparent' }}>
                       <td style={{ padding: '1rem 0.5rem' }}>{row.file}</td>
                       <td style={{ padding: '1rem 0.5rem' }}>{row.type}</td>

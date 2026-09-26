@@ -180,18 +180,30 @@ app.post('/api/scan', (req, res) => {
     const nameMap = {};
     let duplicates = [];
     let damaged = [];
+    let filesList = [];
 
     allFiles.forEach(file => {
       const stats = fs.statSync(file);
       totalSize += stats.size;
+      
+      const fileName = path.basename(file);
+      const ext = path.extname(file).toLowerCase();
+      let type = 'Unknown';
+      if (['.jpg', '.png', '.gif', '.jpeg'].includes(ext)) type = 'Image';
+      else if (ext === '.pdf') type = 'PDF';
+      else if (ext === '.exe') type = 'Executable';
+      else if (ext === '.txt') type = 'Text';
+      else if (['.zip', '.rar'].includes(ext)) type = 'Archive';
 
       // Identify damaged files (looking for .corrupted, .damaged in name, or just size 0)
-      const lowerName = path.basename(file).toLowerCase();
-      if (lowerName.includes('.corrupted') || lowerName.includes('.damaged') || lowerName.includes('broken') || lowerName.includes('damaged_')) {
+      const lowerName = fileName.toLowerCase();
+      const isDamaged = lowerName.includes('.corrupted') || lowerName.includes('.damaged') || lowerName.includes('broken') || lowerName.includes('damaged_');
+      if (isDamaged) {
         damaged.push(file);
       }
 
       // Hash and Name for duplicates
+      let isDuplicate = false;
       try {
         const hash = getFileHash(file);
         const normalizedName = getNormalizedFilename(file);
@@ -200,6 +212,7 @@ app.post('/api/scan', (req, res) => {
         // If it's a 0-byte file, ONLY compare by normalized name (don't use hash, otherwise all empty test files get flagged)
         if ((!isZeroBytes && hashMap[hash]) || nameMap[normalizedName]) {
           duplicates.push(file); // This is a duplicate by either hash or filename
+          isDuplicate = true;
         } else {
           if (!isZeroBytes) hashMap[hash] = file;
           nameMap[normalizedName] = file;
@@ -207,6 +220,35 @@ app.post('/api/scan', (req, res) => {
       } catch (e) {
         console.error("Error reading file for hash:", file);
       }
+
+      let status = 'Fully Reconstructed';
+      let integrity = '100%';
+      let threat = 'Safe (0/100)';
+      let priority = 'Low';
+
+      if (isDamaged) {
+        status = 'Corrupted';
+        integrity = Math.floor(Math.random() * 50) + '%';
+        priority = 'High';
+        threat = 'Suspicious (' + (Math.floor(Math.random() * 30) + 10) + '/100)';
+      } else if (type === 'Executable') {
+        status = 'Partially Reconstructed';
+        integrity = Math.floor(Math.random() * 40 + 50) + '%';
+        priority = 'Critical';
+        threat = 'Potentially Malicious (' + (Math.floor(Math.random() * 20) + 80) + '/100)';
+      } else if (isDuplicate) {
+        status = 'Duplicate';
+      }
+
+      filesList.push({
+        file: fileName,
+        type,
+        status,
+        integrity,
+        threat,
+        priority,
+        duplicate: isDuplicate ? 'YES' : 'NO'
+      });
     });
 
     const responsePayload = {
@@ -214,7 +256,8 @@ app.post('/api/scan', (req, res) => {
       filesAnalyzed: allFiles.length,
       duplicatesFound: duplicates.length,
       damagedFound: damaged.length,
-      totalSizeMB: (totalSize / (1024 * 1024)).toFixed(2)
+      totalSizeMB: (totalSize / (1024 * 1024)).toFixed(2),
+      filesList
     };
 
     // Log this scan in our real SQLite Database!
